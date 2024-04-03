@@ -1,24 +1,37 @@
 import { createContext, useEffect, useState } from "react";
 import PropTypes from 'prop-types';
 import auth from './../Firebase/firebase.config';
-import {  createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import {  GoogleAuthProvider, createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
 
 // step-1: create context
 export const AuthContext = createContext(null)
+//GoogleProvider
+const googleProvider = new GoogleAuthProvider()
+//kono parameter deya lagbe na karon auth, provider 2tai ekhane ase,after that authInfo te pathay dibo
+const signInWithGoogle = () =>{
+    return signInWithPopup(auth, googleProvider)
+    
+}
+
 const AuthProvider = ({children}) => {
     //
     //jehetu authentication niye kaj korbo tai 1ta state thakbe
     const [user, setUser] = useState(null)
+    //page jokhon loading hoye ashbe by default true hishebe pabe
+    const [loading, setLoading] = useState(true)
 
     const createUser = (email, password) => {
+        setLoading(true)
         return createUserWithEmailAndPassword(auth, email, password )
     }
 
     const signInUser = (email, password) =>{
+        setLoading(true)
         return signInWithEmailAndPassword(auth, email, password)
     }
 
     const logOut =() =>{
+        setLoading(true)
         return signOut(auth)
     }
     //Observe auth state change
@@ -35,6 +48,8 @@ const AuthProvider = ({children}) => {
     const unSubscribe = onAuthStateChanged(auth, currentUser =>{
         console.log('current value of the current user', currentUser)
         setUser(currentUser)
+        // jokhon user e kono 1ta man set kore felbo tokhon loading shesh hobe 
+        setLoading(false)
     });
     return () =>{
         unSubscribe()
@@ -42,7 +57,7 @@ const AuthProvider = ({children}) => {
    }, [])
     // const authInfo = {name: 'nobody'}
     //user ta share kore dite pari.it means I have a object authInfo which has a property{user}, & property value is user's value, & createUser funtion takeo diye dibo,keno? jate eta overall application e access kora jay-sheta korte parbo useContext diye karon eta  context e set korsi.
-    const authInfo = {user , createUser, signInUser, logOut}
+    const authInfo = {user,loading , createUser, signInUser, logOut, signInWithGoogle}
     return (
         //step-2: set provider with value
         <AuthContext.Provider value={authInfo}>
