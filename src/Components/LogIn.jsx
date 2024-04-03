@@ -1,13 +1,24 @@
+import { useContext } from "react";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../Providers/AuthProvider";
 
 
 const LogIn = () => {
 
+    const {signInUser} = useContext(AuthContext)
+    console.log(signInUser)
     const handleLogIn = e =>{
         e.preventDefault()
         const email = e.target.email.value
         const password = e.target.password.value
         console.log(email,password)
+        signInUser(email, password)
+        .then(result =>{
+            console.log(result.user)
+        })
+        .catch(error =>{
+            console.log(error.message)
+        })
     }
 
 
@@ -43,7 +54,7 @@ const LogIn = () => {
                         </div>
                     </form>
                     <label className="p-4">
-                    <p>New here? Click <Link to='/register'><a href="" className="link link-primary">Register</a></Link> </p>
+                    <p>New here? Click <Link to='/register'className="link link-primary">Register</Link> </p>
                     </label>
                 </div>
             </div>

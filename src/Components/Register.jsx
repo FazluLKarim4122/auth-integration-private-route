@@ -1,13 +1,27 @@
+import { useContext } from "react";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../Providers/AuthProvider";
 
 
 const Register = () => {
+    const authInfo = useContext(AuthContext)
+    console.log(authInfo)
+    //object hishebe ase{user, createUser} lagbe createUser tai destructuring kore niye nilam
+    const {createUser} = useContext(AuthContext)
     const handleRegister = e =>{
         e.preventDefault()
         const email = e.target.email.value
         const password = e.target.password.value
         const name = e.target.name.value
         console.log(name, email,password)
+        // create user in firebase
+            createUser(email, password)
+            .then(result =>{
+                console.log(result.user)
+            })
+            .catch(error =>{
+                console.log(error.message)
+            })
     }
 
     return (
@@ -50,7 +64,7 @@ const Register = () => {
                         </div>
                     </form>
                     <label className="p-4">
-                        <p>Already have an account? <Link to='/login'><a href="" className="link link-primary">Log in</a></Link> </p>
+                        <p>Already have an account? <Link to='/login' className="link link-primary">Log in</Link> </p>
                     </label>
                 </div>
             </div>

@@ -1,11 +1,50 @@
-import { createContext } from "react";
+import { createContext, useEffect, useState } from "react";
 import PropTypes from 'prop-types';
+import auth from './../Firebase/firebase.config';
+import {  createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 
 // step-1: create context
 export const AuthContext = createContext(null)
 const AuthProvider = ({children}) => {
-    const authInfo = {name: 'nobody'}
+    //
+    //jehetu authentication niye kaj korbo tai 1ta state thakbe
+    const [user, setUser] = useState(null)
+
+    const createUser = (email, password) => {
+        return createUserWithEmailAndPassword(auth, email, password )
+    }
+
+    const signInUser = (email, password) =>{
+        return signInWithEmailAndPassword(auth, email, password)
+    }
+
+    const logOut =() =>{
+        return signOut(auth)
+    }
+    //Observe auth state change
+    // ei application ta state take dhore rakhtese ,jodi log out na hoy tahole state take dhore rekhe she dekhabe user ta ase kina
+    //kono parameter nai prothombar jokhon page load hobe tokho dekhbe, usin call back function
+    // explain unSubscribe: jokhon 1ta state change er moddhe observer kortesi she 1ta reference rekhe disse, she 1ta callback function hishebe peye jay jate pore chaile ei relation ta detach korte pari
+    // advantage unSubscribe: jekhanei jai na keno kono karon state ta jodi change hoy tahole ei information ta she dhore rakhe. 2nd- jehetu setUser e currentUser set kortesi tai user e ei value ta pabe,paile jekono route theke user er info paite pari
+    /**useEffect nilam she onAuthStateChanged call korbe
+     * eta 2ta parameter ney, 1ta auth, 2nd ta observer function mane jokhon change hobe tokhon function take call korbe
+     * then shorashori / condition use kore bolte pari if user eta hole eta hobe something-ekhane directly use korlam 
+     * 
+    */
+   useEffect(()=>{
+    const unSubscribe = onAuthStateChanged(auth, currentUser =>{
+        console.log('current value of the current user', currentUser)
+        setUser(currentUser)
+    });
+    return () =>{
+        unSubscribe()
+    }
+   }, [])
+    // const authInfo = {name: 'nobody'}
+    //user ta share kore dite pari.it means I have a object authInfo which has a property{user}, & property value is user's value, & createUser funtion takeo diye dibo,keno? jate eta overall application e access kora jay-sheta korte parbo useContext diye karon eta  context e set korsi.
+    const authInfo = {user , createUser, signInUser, logOut}
     return (
+        //step-2: set provider with value
         <AuthContext.Provider value={authInfo}>
             {children}
         </AuthContext.Provider>
